@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokémons</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        img {
+            width: 50px;
+            height: 50px;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+            margin-left: 10px;
+        }
+        .search-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+        }
+        input[type="text"] {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Lista de Pokémons</h1>
+    <div class="search-container">
+        <input type="text" id="search" placeholder="Digite o nome do Pokémon">
+        <button onclick="carregarPokemons()">Carregar Pokémons</button>
+        <button onclick="buscarPokemon()">Buscar Pokémon</button>
+    </div>
+ 
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Imagem</th>
+            </tr>
+        </thead>
+        <tbody id="pokemon-list">
+        </tbody>
+    </table>
+ 
+    <script>
+        function carregarPokemons() {
+            fetch('https://pokeapi.co/api/v2/pokemon?limit=10')
+                .then(response => response.json())
+                .then(data => {
+                const tabela = document.getElementById('pokemon-list');
+                tabela.innerHTML = '';
+ 
+                    data.results.forEach((pokemon) => {
+                        fetch(pokemon.url)
+                            .then(response => response.json())
+                            .then(details => {
+                                const linha = `<tr>
+                                <td>${details.id}</td>
+                                <td>${details.name}</td>
+                                <td><img src="${details.sprites.front_default}" alt="${details.name}"></td>
+                                </tr>`;
+                                tabela.innerHTML += linha;
+                            });
+                    });
+                })
+                .catch(error => console.error('Erro ao carregar Pokémons:', error));
+        }
+ 
+        function buscarPokemon() {
+            const search = document.getElementById('search').value.trim().toLowerCase();
+            if (!search) {
+                alert('Por favor, insira o nome do Pokémon.');
+                return;
+            }
+ 
+            fetch(`https://pokeapi.co/api/v2/pokemon/${search}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Pokémon não encontrado.');
+                    }
+                    return response.json();
+                })
+                .then(details => {
+                    const tabela = document.getElementById('pokemon-list');
+                    tabela.innerHTML = '';
+                    const linha = `<tr>
+                    <td>${details.id}</td>
+                    <td>${details.name}</td>
+                    <td><img src="${details.sprites.front_default}" alt="${details.name}"></td>
+                    </tr>`;
+                    tabela.innerHTML = linha;
+                })
+                .catch(error => alert(error.message));
+        }
+    </script>
+</body>
+</html>
